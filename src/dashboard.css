@@ -19,6 +19,29 @@
     height: 30px;
 }
 
+ines (12 sloc) 366 Bytes
+
+svg rect.selection {
+  stroke: none;
+}
+
+
+
+button {
+  width: 100px;
+  border: 1px solid black;
+  margin: 0 auto 5px;
+}
+
+
+.field {
+  display: inline-block;
+  margin: 0 0.5em;
+}
+
+.field input {
+  margin-right: 0.5em;
+}
 
 
 

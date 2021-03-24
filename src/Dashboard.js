@@ -49,11 +49,17 @@ export default class Dashboard extends Component {
     //async because of async fetch
     async componentDidMount()
     {
-        const url = "https://glossa.uni-graz.at/archive/objects/query:depcha.dataset-date-income-expenses/methods/sdef:Query/getJSON?params=" 
-          + encodeURIComponent("$1|<https://gams.uni-graz.at/"+"context:depcha.gfwp"+">");
+        // context:depcha.ward
+        // context:depcha.gfwp
+        // context:depcha.wheaton
+
+        const url = "https://glossa.uni-graz.at/archive/objects/query:depcha.dataset_incomeExpense_date/methods/sdef:Query/getJSON?params=" 
+          + encodeURIComponent("$1|<https://gams.uni-graz.at/"+"context:depcha.gwfp"+">");
+          
         try
         {
         const response = await fetch(url);
+        //console.log(response);
         const data = await response.json();
         this.setState({dataset: data})
         } catch (error) {
@@ -67,31 +73,20 @@ export default class Dashboard extends Component {
         const {selectedUser, greaterThenAge, includedGender} = this.state;
         const filteredData = data.filter(user=>includedGender.indexOf(user.gender)!==-1)
                                  .filter(user=>user.age>greaterThenAge);
-        /*
-        //console.debug(filteredData);                        
-        const getData=()=>{
-            fetch(Query_URL
-            ,{
-                method: 'get'
-            }
-            )
-              .then(function(response){
-                //console.log(response)
-                return response.json();
-              })
-              .then(function(myJson) {
-                //console.log(myJson);
-                return myJson;
-              });
-          }
+        // data from fetch in componentDidMount()
+        const data_from_query = this.state.dataset;
+        //console.log(data_from_query);
+
+         // array with all distinct between_dataset
+    const dataset_between = [];
+    for (let between in data) {
+        dataset_between.push(data[between]['dataset_between']);
+      }
+    //console.log(dataset_between);
+
+        // ToDo. die personen Filtern
         
-        const test = getData();
-        console.debug(test); 
-        getData();
-        */
-                                 
-     
-      
+                    
         return (
             <div>
                 {/* heigth of right panel */} 
@@ -100,7 +95,7 @@ export default class Dashboard extends Component {
                     <Sider width={300} style={{backgroundColor:'#eee'}}>
                         <Content style={{ height: 200 }}>
                             {/* View1 = Selected Viewer */} 
-                            <View1 user={selectedUser}/>
+                            
                         </Content>
                         <Content style={{ height: 300 }}>
                             {/* View2 = Pie Chart Component */} 
@@ -121,30 +116,16 @@ export default class Dashboard extends Component {
                         </Content>*/}
                         <Layout style={{ height: 600 }}>
 
-                            {/* View5 = Bar */} 
+                            {/* View5 = Bar Chart; <View5 data={data}/> */} 
                             <Content>
-                            {/*<View5 data={this.state.dataset}/>*/}
-                             <div>
-                                    {this.state.loading || !this.state.dataset ? (
-                                    <div>loading...</div> 
-                                    ) : (
-                                    <div>
-                                        <div>{this.state.dataset[1].date}</div>
-                                        
-                                          <div className="col">
-                                            <h1>Mi Casa</h1>
-                                            <p>This is my house y&apos;all!</p>
-                                            {this.state.dataset.map(a => <div>{a.dataset}</div>)}
-                                            </div>
-                                            
-                                    </div>
-                                    )}
-                            </div>  
+                                {/* if fetch already as reuslts, than create BarChart*/} 
+                                {data_from_query ? <View5 data={data_from_query} /> : <div><h1> Loading...  </h1><p>Maybe Barchart is not available</p></div>}        
                             </Content>
 
                             <Sider width={300} style={{backgroundColor:'#eee'}}>
-                                  {/* View5 = User List */} 
-                                {/*<View6 data={filteredData} changeSelectUser={this.changeSelectUser}/>*/} 
+                               {/* View6 = User List */} 
+                               {/*<View6 data={filteredData} changeSelectUser={this.changeSelectUser}/>*/}  
+                               {data_from_query ? <View6 data={data_from_query} changeSelectUser={this.changeSelectUser}/> : <div><h1> Loading...  </h1><p>Maybe Between List is not available</p></div>}
                             </Sider>
                         </Layout>
                     </Layout>

@@ -4,17 +4,55 @@ import './style.css';
 const draw = (props) => {
     d3.select('.vis-barchart > *').remove();
     const data = props.data;
+    
+    // array with all distinct bk:Between
+    const dataset_between = [];
+    for (let between in data) {
+        dataset_between.push(data[between]['dataset_between']);
+      }
+    console.log(dataset_between);
+/*
+    function onlyUnique(value, index, self) {
+      return self.indexOf(value) === index;
+    }
+   console.log("huhu");
+    let unique = dataset_between.filter(onlyUnique);
+    console.log(unique);
+*/
+
+   
+    
+
+
+
     const margin = {top: 20, right: 20, bottom: 30, left: 40};
     const width = props.width - margin.left - margin.right;
     const height = props.height - margin.top - margin.bottom;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
-    const value_type = "income";
-    console.log("In Vis Component:" + data);
-    console.log(data);
+    const value_type = "in";
 
+/*
+    // stacks / layers
+    const stackGenerator = stack()
+      .keys(keys)
+      .order(stackOrderAscending);
+    const layers = stackGenerator(data);
+    const extent = [
+      0,
+      max(layers, layer => max(layer, sequence => sequence[1]))
+    ];*/
 
+            // color palette = one color per subgroup
+            var color = d3.scaleOrdinal()
+            .domain(dataset_between)
+            .range(['#e41a1c','#377eb8','#4daf4a'])
     
+          //stack the data? --> stack per subgroup
+          var stackedData = d3.stack()
+          .keys(dataset_between)
+          (data)
+
     let svg = d3.select('.vis-barchart').append('svg')
             .attr('width',width + margin.left + margin.right)
             .attr('height',height + margin.top + margin.bottom)
@@ -29,33 +67,36 @@ const draw = (props) => {
     
 
 
+
+      console.log(stackedData);
+
       // + ... cast to number as d3.max from datatype string is different
       const bk_value = d => +d[value_type];
 
       //const bk_income = d => d.income;
       //const bk_expens = d => d.expens;
-      const bk_date = d => d.date;
+      const bk_date = d => d.d;
       
-      const y = d3.scaleLinear()
+      const yScale = d3.scaleLinear()
         .domain([0, d3.max(data, bk_value)]) 
         .range([innerHeight, 0])
         .nice();  
 
       // scale on x axis
-      const x = d3.scaleBand()
+      const xScale = d3.scaleBand()
         .domain(
           // define sorting 
           data.map(bk_date).sort(function(a, b) {return a - b; })
           )
         .range([0,innerWidth])
-        .padding(0.05);
+        .padding(0.1);
         
     
 
       // y-Axis
       const gYAxis = graph.append('g');
     
-      const yAxis = d3.axisLeft(y)
+      const yAxis = d3.axisLeft(yScale)
         .ticks(10)
         .tickSize(-innerWidth)
         .tickFormat(d => `£ ${d / 1000}K`);  
@@ -67,26 +108,26 @@ const draw = (props) => {
 
     
           
-      rects.attr('width', x.bandwidth)
+      rects.attr('width', xScale.bandwidth)
         .attr('class', 'bar-rect')
-        .attr('height', d => innerHeight - y(d[value_type]))
-        .attr('x', d => x(d.date))
-        .attr('y', d => y(d[value_type]));  
+        .attr('height', d => innerHeight - yScale(d[value_type]))
+        .attr('x', d => xScale(d.date))
+        .attr('y', d => yScale(d[value_type]));  
           
       rects.enter()
         .append('rect')
           .attr('class', 'bar-rect')
-          .attr('width', x.bandwidth)
-          .attr('height', d => innerHeight - y(d[value_type]))
-          .attr('x', d => x(d.date))
-          .attr('y', d => y(d[value_type])) 
+          .attr('width', xScale.bandwidth)
+          .attr('height', d => innerHeight - yScale(d[value_type]))
+          .attr('x', d => xScale(d.d))
+          .attr('y', d => yScale(d[value_type])) 
         .append('title')
           .text(d => d[value_type]); 
 
       const gXAxis = graph.append('g')
         .attr('transform', `translate(0, ${innerHeight})`);
 
-      const xAxis = d3.axisBottom(x);
+      const xAxis = d3.axisBottom(xScale);
       // show x-axis  
       gXAxis.call(xAxis);
       // style text of x-axis
@@ -95,12 +136,6 @@ const draw = (props) => {
         .attr("dx", "-.8em")
         .attr("dy", ".15em")
         .attr("transform", "rotate(-65)");
-
-
-        //console.log(data);
-        //console.log(bk_value);
-        //console.log(d3.max(data, bk_value));
-
 
  /*
     // format the data

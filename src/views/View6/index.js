@@ -11,16 +11,17 @@ export default class View6 extends Component {
     render() {
         const {data} = this.props;
         return (
-            <div id='view6' className='pane'>
-                <div className='header'>User List</div>
+            <div id='view6' className='pane' style={{ overflowX: 'hidden',overflowY:'scroll' }}>
+                <div className='header'>Between List</div>
                 <List
                     size="small"
                     bordered
                     dataSource={data}
                     renderItem={user => <List.Item onClick = {() => this.selectUser(user)}>
                         <div>
-                            {user.name + ':' + user.age}
+                            {user.between_name}
                         </div>
+                        {/*+ ':' + user.age */}
                     </List.Item>}
                 />
             </div>
